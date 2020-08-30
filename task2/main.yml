@@ -1,0 +1,164 @@
+- name: Provisioning EC2 Instance 
+  hosts: localhost
+  vars_files:
+      - vault.yml
+  tasks:
+      - name: installing boto
+        pip:
+           name: "boto"
+           executable: pip3
+      - name: installing boto3
+        pip:
+           name: "boto3"
+           executable: pip3
+
+      - name: creating security group
+        ec2_group:
+           aws_access_key: "{{ ak }}"
+           aws_secret_key: "{{ sak }}"
+           name: "launch-wizard-1"
+           description: "sg with rule descriptions"
+           vpc_id: "vpc-224d514a"
+           tags:
+               Name: "task2-sg"
+           region: ap-south-1
+           rules:
+             - proto: tcp
+               from_port: 22
+               to_port: 22
+               cidr_ip: 0.0.0.0/0
+               rule_desc: allow all on port 22 for ssh
+
+             - proto: tcp
+               cidr_ip: 0.0.0.0/0
+               ports:
+                 - 80
+               rule_desc: allow all on port 80 for webserver
+"main.yml" 90L, 2501C
+- name: Provisioning EC2 Instance
+  hosts: localhost
+  vars_files:
+      - vault.yml
+  tasks:
+      - name: installing boto
+        pip:
+           name: "boto"
+           executable: pip3
+      - name: installing boto3
+        pip:
+           name: "boto3"
+           executable: pip3
+
+      - name: creating security group
+        ec2_group:
+           aws_access_key: "{{ ak }}"
+           aws_secret_key: "{{ sak }}"
+           name: "launch-wizard-1"
+           description: "sg with rule descriptions"
+           vpc_id: "vpc-224d514a"
+           tags: 
+               Name: "task2-sg"
+           region: ap-south-1
+           rules:
+             - proto: tcp
+               from_port: 22
+               to_port: 22
+               cidr_ip: 0.0.0.0/0               
+               rule_desc: allow all on port 22 for ssh
+
+             - proto: tcp
+               cidr_ip: 0.0.0.0/0
+               ports: 
+                 - 80
+               rule_desc: allow all on port 80 for webserver
+            
+           rules_egress:
+             - proto: all
+               from_port: 0
+               to_port: 0
+               cidr_ip: 0.0.0.0/0
+          
+      - name: Provisioning aws ec2 instance 
+        ec2:
+            aws_access_key: "{{ ak }}"
+            aws_secret_key: "{{ sak }}"
+            key_name: "ansiblekey"
+            instance_type: "t2.micro"
+            image: "ami-0ebc1ac48dfd14136"
+            wait: yes
+            count: 1
+            group: "launch-wizard-1"
+- name: Provisioning EC2 Instance
+  hosts: localhost
+  vars_files:
+      - vault.yml
+  tasks:
+      - name: installing boto
+        pip:
+           name: "boto"
+           executable: pip3
+      - name: installing boto3
+        pip:
+           name: "boto3"
+           executable: pip3
+
+      - name: creating security group
+        ec2_group:
+           aws_access_key: "{{ ak }}"
+           aws_secret_key: "{{ sak }}"
+           name: "launch-wizard-1"
+           description: "sg with rule descriptions"
+           vpc_id: "vpc-224d514a"
+           tags:
+               Name: "task2-sg"
+           region: ap-south-1
+           rules:
+             - proto: tcp
+               from_port: 22
+               to_port: 22
+               cidr_ip: 0.0.0.0/0
+               rule_desc: allow all on port 22 for ssh
+
+             - proto: tcp
+               cidr_ip: 0.0.0.0/0
+               ports:
+                 - 80
+               rule_desc: allow all on port 80 for webserver
+"main.yml" 90L, 2501C
+            vpc_subnet_id: "subnet-609ca608"
+            region: "ap-south-1"
+            assign_public_ip: "yes"
+            instance_tags:
+               Name: "task2"
+        register: specs
+
+      - name: adding host
+        add_host:
+           hostname: "{{ specs.instances[0].public_ip }}"
+           groups: ec2_instance
+      - name: printing ip
+        debug:
+           var: "{{ specs.instances[0].public_ip }}"
+- name: Changes in EC2 instance
+  hosts: ec2_instance
+  become: true
+  gather_facts: false
+  tasks:
+      - name: doing ssh 
+        wait_for_connection:
+           timeout: 120     
+      - name: installing httpd server
+        package:
+           name: "httpd"
+           state: present
+
+      - name: configuring httpd server
+        copy:
+           dest: "/var/www/html/index.html"
+           content: "hi hello, ec2 instance is created using ansible"
+
+      - name: starting the httpd service
+        service:
+           name: httpd
+           state: started
+           enabled: yes
