@@ -40,6 +40,22 @@
                 to_port: 0
                 cidr_ip: 0.0.0.0/0
         register: specs
+      - name: Provisioning aws ec2 instance
+        ec2:
+           aws access key: "{{ ak }}"
+           aws secret key: "{{ sak }}"
+           key name: "ansiblekey"
+           instance_type: "t2.micro"
+           image: "ami-0ebc1ac48dfd14136"
+           wait: yes
+           count: 1
+           group: "launch-wizard-I"
+           vpc_subnet_id: "subnet-609ca608"
+           region: "ap-south-l"
+           assign public ip: "yes"
+           instance tags:
+              Name: "task2"
+        register: specs
 
       - name: adding host
         add_host:
