@@ -34,11 +34,11 @@
                ports:
                  - 80
                rule_desc: allow all on port 80 for webserver
-            vpc_subnet_id: "subnet-609ca608"
-            region: "ap-south-1"
-            assign_public_ip: "yes"
-            instance_tags:
-               Name: "task2"
+            rules_egress:
+              - proto: all
+                from_port: 0
+                to_port: 0
+                cidr_ip: 0.0.0.0/0
         register: specs
 
       - name: adding host
