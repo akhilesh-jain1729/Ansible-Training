@@ -1,0 +1,18 @@
+---
+# tasks file for webserver
+- name: install httpd
+  package:
+    name: "httpd"
+    state: present
+
+- name: copy content
+  copy:
+    content: "Task3 Successfully completed\n, hello from {{ ansible_hostname }} "
+    dest: /var/www/html/index.html
+  notify: restart service
+
+- name: service httpd start
+  service:
+    name: "httpd"
+    state: started
+    enabled: yes
