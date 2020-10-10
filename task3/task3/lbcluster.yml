@@ -1,0 +1,10 @@
+---
+- name: "Loadbalancer"
+  hosts: tag_Name_Ansible_LoadBalancer
+  roles:
+     - role: lb
+
+- name: "Webserver"
+  hosts: tag_Name_Ansible_WebServer
+  roles:
+     - role: webserver                         
