@@ -1,0 +1,42 @@
+- hosts: web2
+  tasks:
+   -  name: Creating docker repository
+      copy:
+        content: "[docker] \nbaseurl.https://download.docker.com/linux/centos/7/x86 64/stable/ \ngpgcheck=O"
+        dest: "/etc/yum.repos.d/docker.repo"
+
+   -  name: Giving --nobest. option for installing docker
+      replace:
+        path: "/etc/dnf/dnf.conf"
+        after: "best=" 
+        regexp: "True"
+        replace: False
+ 
+   -  name: Installing docker package
+      package:
+        name: "docker-ce"
+        state: present
+      register: docker
+
+   -  name: Starting docker service
+      service:
+        name: docker
+        state: started
+      register: d_service
+   -  name: docker-py installed
+      package:
+        name: python3
+        state: present
+
+   -  name: Installed package for docker module
+      pip:
+        name: docker-py
+        executable: pip3
+
+   -  name: Create a data container
+      docker_container: 
+        name: .webserver. 
+        image: .httpd.
+        interactive: yes 
+        tty: yes
+        expose: 80:80
